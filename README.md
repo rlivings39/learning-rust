@@ -100,3 +100,10 @@ references.
 Slices can be defined via `let slice = &s[3..6];` where the start index is included and the end index is excluded. `..3` is the same as `0..3` and `&s[1..s.len()]` is the same as `&s[1..]`.
 
 The type of a string slice is `&str`. The type of an array slice is something like `&[i32]`.
+
+## Enums and match
+
+In Rust enums can contain arbitrary data and allow for matching in `match`. `match` is a powerful pattern matching construct. The `if...let` and `let...else` constructs are shorthand ways to use matching when you don't need an entire match.
+
+Next:
+https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html
