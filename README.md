@@ -107,3 +107,34 @@ In Rust enums can contain arbitrary data and allow for matching in `match`. `mat
 
 Next:
 https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html
+
+## Crates, packages, and modules
+
+A **crate** is the smallest chunk of code that Rust will compile. There are binary crates and library crates. A package is defined by a `Cargo.toml` file and can contain 0 or more binary crates and at most 1 library crate. For each file in the `src/bin` folder, you get a binary crate.
+
+Rust begins compiling by starting from the crate root, usually either `src/lib.rs` or `src/main.rs` for lib/binary crates.
+
+Modules can be declared with `mod garden;`. The compiler looks for the definition
+
+* Inline in curly brackets
+* In `src/garden.rs`
+* In `src/garden/mod.rs`
+
+Submodules can be defined in a module file `mod vegetables;`
+
+* Inline
+* in `src/garden/vegetables.rs`
+* In `src/garden/vegetables/mod.rs`
+
+Paths are then built up with `crate::garden::vegetables::Asparagus`. Modules can be public (`pub`) or private (the default) to parents. Module members can be public or private too.
+
+`use` can be used to import a name to a scope.
+
+You refer to modules using **paths** which can be absolute or relative. Absolute paths are from the crate root which is either the crate's name for external modules or the literal `crate` for the current crate.
+
+Relative paths can use `super, self` or an id in the current module.
+
+Ancestor modules can't see descendent module contents by default but descendants can see ancestors.
+
+Struct types can be public or private as can each of their fields. With a private field, you need to include a constructor function. For enums only the type can be declared public, at which point all members become public.
+
