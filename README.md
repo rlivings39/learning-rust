@@ -128,8 +128,6 @@ Submodules can be defined in a module file `mod vegetables;`
 
 Paths are then built up with `crate::garden::vegetables::Asparagus`. Modules can be public (`pub`) or private (the default) to parents. Module members can be public or private too.
 
-`use` can be used to import a name to a scope.
-
 You refer to modules using **paths** which can be absolute or relative. Absolute paths are from the crate root which is either the crate's name for external modules or the literal `crate` for the current crate.
 
 Relative paths can use `super, self` or an id in the current module.
@@ -137,4 +135,43 @@ Relative paths can use `super, self` or an id in the current module.
 Ancestor modules can't see descendent module contents by default but descendants can see ancestors.
 
 Struct types can be public or private as can each of their fields. With a private field, you need to include a constructor function. For enums only the type can be declared public, at which point all members become public.
+
+`use` can be used to import a name to a scope. When importing functions, the parent module is imported so the function is `modname::func_name` but for types the type is imported directly.
+
+`pub use` can be used to re-export something.
+
+## Collections
+
+### Vectors
+
+`Vec<T>` is a heap allocated vector. Use `Vec::new` or the `vec!` macro to allocate. Use `[]` for direct access which will panic on out of bounds. `Vec::get` returns an `Option<&element>`. Looping through the `Vec` can be done with
+
+```rust
+// Skip the mut for immutable references
+let mut v = vec![100, 32, 57];
+for i in &mut v {
+  *i += 50;
+}
+```
+
+Vectors are homogenous but can use `enums` as a variant to store a finite set of base types.
+
+### Strings
+
+See the [string section](https://doc.rust-lang.org/book/ch08-02-strings.html) for all of the details.
+
+The core string type is a string slice `str` usually seen in borrowed form `&str`. That's the type of string literals. `String` is in the standard library is a growable, mutable, owned, UTF-8 encoded string type.
+
+String is a wrapper around a vector of bytes and so provides some of the same APIs.
+
+`.to_string()` can be used to get a `String` on any type implementing `Display` including string literals: `let s = "hello".to_string();`. `String::from` does the same thing.
+
+`push, push_str` can be used to add to the string.
+
+Note that `+` takes ownership of the first operand. If you don't want that use `format!` and string template parameters.
+
+Indexing into a string via `&s[n]` is disallowed because the `String` is effectively `Vec<u8>` and UTF-8 is a variable-length encoding. Indexing bytes is rarely what someone wants.
+
+Slicing `&s[0..2]` is supported but is checked at runtime to ensure you're operating at character boundaries.
+
 
