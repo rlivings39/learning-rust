@@ -174,4 +174,16 @@ Indexing into a string via `&s[n]` is disallowed because the `String` is effecti
 
 Slicing `&s[0..2]` is supported but is checked at runtime to ensure you're operating at character boundaries.
 
+Use `.chars(), .bytes()` to say if you want chars or bytes and iterate/index those instead.
 
+The Book says that handling grapheme clusters is even more complicated and not handled in the standard library.
+
+### HashMap
+
+`HashMap<K, V>` is a hash table. Create one with `::new` use `::insert` to insert things. Use `::get` to get an `Option<&V>` like `m.get(&team_name).copied().unwrap_or(0);`.
+
+Values are copied/moved into the hash table so it owns them. If references are stored, then borrowing happens. `scores.entry(String::from("Yellow")).or_insert(50);` can be used to insert only if the key does not exist.
+
+`let count = map.entry(word).or_insert(0); *count += 1;` can be used to update a value in place.
+
+**Note:** Iteration order is unstable in `HashMap`.
