@@ -186,4 +186,74 @@ Values are copied/moved into the hash table so it owns them. If references are s
 
 `let count = map.entry(word).or_insert(0); *count += 1;` can be used to update a value in place.
 
-**Note:** Iteration order is unstable in `HashMap`.
+**Note:** Iteration order is unstable in `HashMap`. There's a crate called `IndexMap` that claims to fix this.
+
+## Error handling
+
+Rust separates two types of errors **recoverable** and **unrecoverable**. The first are handled by using a `Result<T,E>` type and the second is with `panic!`.
+
+Panics occur with explicit calls to `panic!` or with operations that trigger a panic like indexing an array out of bounds.
+
+Panics unwind the stack and clean up by default. Adding
+
+```toml
+[profile.release]
+panic = 'abort'
+```
+
+in your `Cargo.toml` skips the unwinding and just aborts.
+
+Setting then env variable `RUST_BACKTRACE=1` shows a backtrace during a panic.
+
+The result type is used in operations which have recoverable errors
+
+```rust
+enum Result<T,E> {
+  Ok(T),
+  Err(E),
+}
+```
+
+As an example, opening a file may fail. Using the `Result` output allows you to handle cases:
+
+```rust
+use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() {
+    let greeting_file_result = File::open("hello.txt");
+
+    let greeting_file = match greeting_file_result {
+        Ok(file) => file,
+        Err(error) => match error.kind() {
+            ErrorKind::NotFound => match File::create("hello.txt") {
+                Ok(fc) => fc,
+                Err(e) => panic!("Problem creating the file: {e:?}"),
+            },
+            _ => {
+                panic!("Problem opening the file: {error:?}");
+            }
+        },
+    };
+}
+```
+
+Using other tools like `unwrap_or_else, unwrap, expect` can make your code more concise.
+
+Given this `Result` idiom, propagating errors amounts to returning results up the call stack until something fully handles it. This gets quite messy when done explicitly using the match code above.
+
+Rust provides the `?` operator:
+
+```rust
+use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut username_file = File::open("hello.txt")?;
+    let mut username = String::new();
+    username_file.read_to_string(&mut username)?;
+    Ok(username)
+}
+```
+
+Putting `?` after something returning a `Result` means to return the error from the function if there is one. Otherwise the `Ok` value is returned from the expression.
