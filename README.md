@@ -257,3 +257,13 @@ fn read_username_from_file() -> Result<String, io::Error> {
 ```
 
 Putting `?` after something returning a `Result` means to return the error from the function if there is one. Otherwise the `Ok` value is returned from the expression.
+
+`?` causes the `from` function to be called on the error to covert it to the type declared in the containing function declaration.
+
+`?` can be chained and used as a value. It can only be used on expression in functions where the expression's type matches the function's return type.
+
+`?` also works with `Option`.
+
+The `Result::ok` and `Option::ok_or` allow converting `Result` to `Option` and vice versa.
+
+

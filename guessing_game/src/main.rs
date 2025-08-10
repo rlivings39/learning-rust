@@ -3,6 +3,9 @@ use std::io;
 
 use rand::Rng;
 
+mod guess;
+use crate::guess::Guess;
+
 fn main() {
   println!("Guess the number!");
 
@@ -25,7 +28,7 @@ fn main() {
       }
       _ => {}
     }
-    let guess: u32 = match guess.parse() {
+    let guess: i32 = match guess.parse() {
       Ok(num) => num,
       Err(_) => {
         println!("Invalid number. Try again.");
@@ -33,9 +36,17 @@ fn main() {
       }
     };
 
-    println!("You guessed: {guess}");
+    let guess: Guess = match Guess::new(guess) {
+      Ok(g) => g,
+      Err(e) => {
+        println!("{}", e);
+        continue;
+      }
+    };
+    let value = guess.value();
+    println!("You guessed: {value}");
 
-    match guess.cmp(&secret_number) {
+    match value.cmp(&secret_number) {
       Ordering::Less => println!("Too small!"),
       Ordering::Greater => println!("Too big!"),
       Ordering::Equal => {
