@@ -266,7 +266,11 @@ Putting `?` after something returning a `Result` means to return the error from 
 
 The `Result::ok` and `Option::ok_or` allow converting `Result` to `Option` and vice versa.
 
-## Generics and traits
+## Generics, traits, and lifetimes
+
+Generics, traits, and lifetimes are all ways to help reduce code duplication and make your code more flexible while still preserving Rust's static safety guarantees.
+
+### Generics
 
 Generics look like other languages.
 
@@ -275,6 +279,8 @@ Generics look like other languages.
 * Enums `enum Option<T> {Some(T), None}`
 * Methods `impl<T> Point<T> {fn foo<T,S>()..}`.
   * Specialization also works `impl Point<f32> {}` to only impact `f32` points.
+
+### Traits
 
 A **trait** defines functionality that a type has and can share with other types. Traits define behavior in an abstract way. **Trait bounds** specify that a generic type posses certain behavior. Traits are like interfaces in other languages.
 
@@ -343,4 +349,59 @@ impl<T: Display> ToString for T {
 }
 ```
 
+### Lifetimes
 
+Lifetimes are another kind of generic that ensure references are valid as long as they need to be. They are often inferred but lifetimes can also be explicit.
+
+Lifetime annotations don't change how long a reference lives. Rather they describe relationships of lifetimes of multiple references among each other.
+
+Lifetime annotations must start with `'` and are short, lowercase names by convention. `'a` is often used as the first. For example:
+
+```rust
+&i32        // A reference
+&'a i32     // A reference with a named lifetime
+&'a mut i32 // A mutable reference with a named lifetime
+```
+To use lifetimes in function signatures, declare them within `<>` just like generic type parameters and then use them as appropriate.
+
+```rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+  // Lifetimes tell the borrow checker that the return value lives
+  // as long as the shorter of the lives of x or y
+  if x.len() > y.len() {x} else {y}
+}
+```
+
+Lifetime annotations specify constraints used by the borrow checker when analyzing your program. They are part of the contract of the function.
+
+Structs can also hold references and need lifetime annotations in this case.
+
+The Rust compiler has a set of **lifetime elision rules** which are cases where the compiler can explicitly infer lifetime relationships relieving programmers from having to specify explicit lifetimes.
+
+Three rules are applied for functions
+
+1. Each input parameter gets it's own lifetime
+2. If there is one input lifetime, that lifetime is assigned to all output lifetimes
+3. If there are multiple input lifetimes but one is `&self` or `&mut self`, the lifetime of `self` is assigned to all output lifetimes making methods easier to read and write.
+
+There is one special lifetime `'static` that means that the value is available for the entire life of the program.
+
+Finally, here is a function combining generics, traits, and lifetimes
+
+```rust
+use std::fmt::Display;
+
+fn longest_with_an_announcement<'a, T>(
+    x: &'a str,
+    y: &'a str,
+    ann: T,
+) -> &'a str
+where
+    T: Display,
+{
+    println!("Announcement! {ann}");
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+## Testing in Rust
