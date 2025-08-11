@@ -405,3 +405,59 @@ where
 ```
 
 ## Testing in Rust
+
+Rust supports marking things with attributes like `#[test]`. You can apply that macro to a function to make it a test function.
+
+Making a new Cargo lib project will create a test module and example test for you. For example
+
+```rust
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}
+```
+Run that with `cargo test`. Note that this will also extract any code snippets in documentation and run those too to ensure they work.
+
+Test functions are run in their own dedicated thread. Tests fail when they panic. Using `assert!, assert_eq!, assert_ne!`. The 2nd and third will print out the values compared in case of a failure. Adding `#[derive(PartialEq, Debug)]` to your structs or enums will make them compatible with these operations.
+
+Custom failure messages can be passed to the `assert*` macros.
+
+The `#[should_panic]` attribute will make a test verify that the code under test panics. This takes an optional `expected` parameter which allows verifying the right type of panic happens.
+
+`#[ignore]` says to ignore a test by default
+
+Test functions can also return `Result<(), String>` so that they fail on `Err` instead of relying on panics.
+
+### Controlling how tests run
+
+Options can be passed to `cargo test` and to the test binary: `cargo test --flag1 --flag2 -- --binary-flag1 --binary-flag2`
+
+Some useful options are
+
+* `cargo test -- --test-threads=N` - Set number of threads
+* `cargo test -- --show-output` - Show any stdout output
+* `cargo test filter_string` - Only run tests whose name matches `filter_string`
+* `cargo test -- --ignored` - Run ignored tests
+* `cargo test -- --include-ignored` - Run all tests ignored or not
+* `cargo test --test integration_test_file` - Run all tests in the integration test file
+### Test organization
+
+Unit tests are typically located in the `src/` directory in a `tests` module inside the file being tested. The tests module is annotated with `#[cfg(test)]`. This attribute tells the compiler to only compile this code when building for test.
+
+Because test functions are in a nested module, they can access private functions. It's up to you whether or not you think it's a good idea to test private code.
+
+Integration tests go in a `tests/` directory parallel to your source directory. They test your public API. Each file is treated as a separate crate during build.
+
+To make a shared testing module, use the older convention of making a directory `tests/mod_name/mod.rs`
+
+Integration tests can only test lib crates. This is why binary crates are usually structured as a thin wrapper around a lib crate that **can** be tested.
