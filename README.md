@@ -266,4 +266,6 @@ Putting `?` after something returning a `Result` means to return the error from 
 
 The `Result::ok` and `Option::ok_or` allow converting `Result` to `Option` and vice versa.
 
+## Generics
 
+Generics look like other languages. Here's a function `fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T`.
