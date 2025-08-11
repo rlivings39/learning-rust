@@ -266,6 +266,81 @@ Putting `?` after something returning a `Result` means to return the error from 
 
 The `Result::ok` and `Option::ok_or` allow converting `Result` to `Option` and vice versa.
 
-## Generics
+## Generics and traits
 
-Generics look like other languages. Here's a function `fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T`.
+Generics look like other languages.
+
+* Function `fn largest<T>(list: &[T]) -> &T`
+* Structs `struct Point<T> {}`
+* Enums `enum Option<T> {Some(T), None}`
+* Methods `impl<T> Point<T> {fn foo<T,S>()..}`.
+  * Specialization also works `impl Point<f32> {}` to only impact `f32` points.
+
+A **trait** defines functionality that a type has and can share with other types. Traits define behavior in an abstract way. **Trait bounds** specify that a generic type posses certain behavior. Traits are like interfaces in other languages.
+
+Traits define a set of one or more methods that a type must have
+
+```rust
+pub trait Summary {
+  fn summarize(&self) -> String;
+}
+```
+
+To implement a trait for a type use the `impl...for` construct: `impl Summary for BlogPost {}` outside of the definition for `BlogPost`.
+
+When using a type implementing the trait, you have to pull in both the type and the trait.
+
+You can implement a trait on a type if at least one of the trait or type is local to your crate. So you can't implement an external trait on an external type. Rust calls this preserving **coherence**.
+
+Traits can also provide default behavior that can optionally be overridden. Default implementations can call other methods in the trait even if those do not have default implementations.
+
+Traits can be used as parameters `fn notify(item: &impl Summary)` to allow accepting any type implementing `Summary`. This is shorthand for the trait bound `fn notify<T: Summary>(item: &T)`.
+
+`+` can be used to create sum types to implement multiple traits
+
+```rust
+pub fn notify(item: &(impl Summary + Display));
+pub fn notify<T: Summary + Display>(item: &T);
+```
+
+`where` clauses can clean up the signature by placing the trait bounds after the declaration
+
+```rust
+fn some_function<T, U>(t: &T, u: &U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{
+```
+
+`impl TraitName` can also be used in return types, but not to allow returning multiple types.
+
+Trait bounds allow for conditionally implementing methods on generics only when the generic type parameters satisfy the traits:
+
+```rust
+struct Pair<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+// Only implement cmp_display for types implementing Display and PartialOrd
+impl<T: Display + PartialOrd> Pair<T> {
+  fn cmp_display(&self){...}
+}
+```
+
+You can also conditionally implement traits only for types implementing other traits. These are called **blanket implementations**:
+
+```rust
+impl<T: Display> ToString for T {
+    // Now any displayable type also implements ToString!
+}
+```
+
+
