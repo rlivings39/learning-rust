@@ -497,3 +497,40 @@ Other `Iterator` methods are **iterator adapters** which take the original itera
 `impl Iterator<Item = String>` can be used to take an iterator.
 
 Iterators and closures in Rust tend to be zero cost abstractions. The book shows examples where they match performance of ordinary for loops.
+
+## Cargo
+
+Build profiles can be customized in `Cargo.toml`
+
+```toml
+[profile.dev]
+opt-level = 1
+```
+
+`cargo doc` builds doc for your crate based on doc comments `/// With 3 slashes`. These are formatted with markdown.
+
+Common sections include: examples, panics, safety.
+
+`cargo test` extracts code snippets from your documentation and runs them as tests to ensure they still compile and run.
+
+Using `//!` for a doc comment adds documentation to the containing item rather than the following item. These are useful for crate root files and modules.
+
+`pub use` can be used to re-export items in more convenient locations in your crate.
+
+Cargo supports **workspaces** which allow bundling multiple related packages together. To do this create a root folder with a Cargo.toml containing
+
+```toml
+[workspace]
+ws_name = "1.2.3"
+```
+
+then run `cargo add new_package [--lib]` for each sub package.
+
+Workspaces all share the same target folder and don't necessarily depend on each other. They can refer to each other via `dependencies`.
+
+Each sub-package/crate has its own `Cargo.toml` and manages things independently.
+
+`cargo install` can be used to install binary crates locally.
+
+Adding a binary in your path called `cargo-something` lets you extend cargo by calling `cargo something`. These also show up in `cargo list`. Such extensions can be installed from public repos.
+
