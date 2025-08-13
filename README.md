@@ -302,7 +302,7 @@ Traits can also provide default behavior that can optionally be overridden. Defa
 
 Traits can be used as parameters `fn notify(item: &impl Summary)` to allow accepting any type implementing `Summary`. This is shorthand for the trait bound `fn notify<T: Summary>(item: &T)`.
 
-`+` can be used to create sum types to implement multiple traits
+`+` can be used to create sum types to implement if traits
 
 ```rust
 pub fn notify(item: &(impl Summary + Display));
@@ -462,3 +462,38 @@ Integration tests go in a `tests/` directory parallel to your source directory. 
 To make a shared testing module, use the older convention of making a directory `tests/mod_name/mod.rs`
 
 Integration tests can only test lib crates. This is why binary crates are usually structured as a thin wrapper around a lib crate that **can** be tested.
+
+## Closures
+
+Rust has closures like many other languages
+
+```rust
+// Fully annotated
+let f1 = |num: i32| -> i32 { num + 1 }
+// Everything inferred
+let f2 = |num| num + 1
+```
+
+Closure capture is usually done by reference with mutability inferred by the compiler. To force a move, use `move || closure_body()`. This is useful to get a thread to take ownership of some data.
+
+Closures and functions in Rust implement one or more of a variety of traits
+
+1. `FnOnce` applies to closures that can be called once. All closures implement at least this trait because all closures can be called. A closure that moves captured values out of its body will only implement FnOnce and none of the other Fn traits, because it can only be called once.
+
+2. `FnMut` applies to closures that don’t move captured values out of their body, but that might mutate the captured values. These closures can be called more than once.
+
+3. `Fn` applies to closures that don’t move captured values out of their body and that don’t mutate captured values, as well as closures that capture nothing from their environment. These closures can be called more than once without mutating their environment, which is important in cases such as calling a closure multiple times concurrently.
+
+## Iterators
+
+Iterators are used to iterate through collections. In Rust iterators are lazy and are often had by doing `thing.iter()`. They implement the `Iterator` trait which requires defining an associated `Item` type and a `next` method that returns `Option<Item>` returning `None` when iteration is finished.
+
+`iter()` returns immutable references to the items. `into_iter()` takes ownership of the items. `iter_mut()` yields mutable references to the items.
+
+`Iterator` has many methods (aka **consuming adapters**) which take ownership of the iterator and consume it like `sum` or `collect`.
+
+Other `Iterator` methods are **iterator adapters** which take the original iterator and return a new iterator modifying the original. For example, `map` takes the original and returns a new iterator which applies a function to each element of the original returning the modified result.
+
+`impl Iterator<Item = String>` can be used to take an iterator.
+
+Iterators and closures in Rust tend to be zero cost abstractions. The book shows examples where they match performance of ordinary for loops.
