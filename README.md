@@ -559,6 +559,32 @@ Rust also has deref coercion which allows passing `&T` to a function or method e
 
 `DerefMut` can be used to implement the same behavior on mutable references. Coercion from immutable to immutable and mutable to mutable are both straightforward. Rust will also coerce mutable to immutable as that preserves safety.
 
+## Concurrency
+
+`std::thread::spawn` launches threads with a closure. It returns a `JoinHandle<T>` whose `join()` method waits for the thread to finish.
+
+`move || {}` defines a closure that takes ownership of its data allowing transfer between threads.
+
+Rust supports message passing via **channels** to implement the Go philosophy "Do not communicate by sharing memory; instead, share memory by communicating."
+
+`std::sync::mpsc::channel()` returns the transmission and receiver halves `tx, rx`. mpsc means multiple producer single consumer. `tx.send(val).unwrap();` can send a value. `rx.recv()` gets the sent value blocking until one is available. `try_recv` doesn't block but immediately returns reading a message if one is available and erroring if not.
+
+`rx` is iterable so you can keep reading messages.
+
+Cloning the transmitter allows having multiple producers.
+
+### Mutexes
+
+`std::sync::Mutex<T>` provides a mutex around a value. The lock method blocks until the mutex is acquired. It returns an error if the thread locking the mutex panics.
+
+`lock()` returns a `MutexGuard` wrapped in a `LockResult`. `MutexGuard` is a smart pointer whose drop unlocks the mutex. So you can't forget to release it.
+
+Using `Arc::new()/clone()` you can get multiple ownership in threading situations with `Mutex`. `Arc` is an atomic reference count.
+
+`std::sync::atomic` provides primitive atomic types that are preferable over `Mutex`.
+
+
+
 ## Cargo
 
 Build profiles can be customized in `Cargo.toml`
