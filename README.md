@@ -583,6 +583,35 @@ Using `Arc::new()/clone()` you can get multiple ownership in threading situation
 
 `std::sync::atomic` provides primitive atomic types that are preferable over `Mutex`.
 
+### `Send` and `Sync` traits
+
+`std::marker::Send/Sync` mark types as being useful in concurrent situations. `Send` means that the value can be transferred between threads. Nearly all primitives are `Send` as are types composed of `Send`able types.
+
+`Sync` means that a type can be shared from multiple threads via an immutable reference.
+
+## Async
+
+Rust uses the `async` and `await` keywords to define `async` blocks/functions and await `Futures`. `Future` is a trait that many types implement.
+
+`await` is a postfix keyword allowing chaining `lib::get(url).await.text().await`.
+
+An `async` block/function is equivalent to a block/function returning a future of the return type of the block/function
+
+```rust
+use std::future::Future;
+use trpl::Html;
+
+fn page_title(url: &str) -> impl Future<Output = Option<String>> {
+    async move {
+        let text = trpl::get(url).await.text().await;
+        Html::parse(&text)
+            .select_first("title")
+            .map(|title| title.inner_html())
+    }
+}
+```
+
+Rust async code requires a **runtime** to be able to execute the `async` blocks. This runtime must be set up inside your main function before any async code can execute. They often also provide network and file I/O capabilities.
 
 
 ## Cargo
